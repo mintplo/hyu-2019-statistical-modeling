@@ -2,8 +2,8 @@
 
 ## 개발 환경 설정 (based on OSX)
 ### Requirements
-- [R Language](https://www.vagrantup.com/)
-- [R Studio IDE](https://www.virtualbox.org/)
+- [R Language](https://www.r-project.org/)
+- [R Studio IDE](https://www.rstudio.com/products/rstudio/download/)
 
 위 Requirements를 자신의 운영체제(OS)에 맞게 설치
 
