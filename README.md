@@ -19,6 +19,4 @@ https://stackoverflow.com/questions/20457290/installing-r-with-homebrew
 | 날짜   |      실습 내용      |
 |----------|:-------------:|
 | 2019-03-27 | 전체적인 내용 및 설치, R Lang 기본적인 내용 수업 |
-
-## 실습
-1. TBD
+| 2019-04-03 | 정규분포 관련 R Function |
