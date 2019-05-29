@@ -21,3 +21,4 @@ https://stackoverflow.com/questions/20457290/installing-r-with-homebrew
 | 2019-03-27 | 전체적인 내용 및 설치, R Lang 기본적인 내용 수업 |
 | 2019-04-03 | 정규분포 관련 R Function |
 | 2019-05-22 | R Boxplot + Data Manipulation 수업 |
+| 2019-05-29 | 회귀분석 #1 |
