@@ -1,0 +1,29 @@
+hyper.sample <- function(npop, ndef, nsamp) {
+     # choose( ) 함수를 사용하여 도수 계산
+	denom <- choose(npop, nsamp)
+	freq <- choose(ndef, 0:nsamp) * choose(npop-ndef, nsamp-(0:nsamp))
+	print(freq)
+	cat("sum(freq) =", sum(freq),"\n")
+     # 확률 계산
+	fx <- freq / denom
+	print(fx)
+	cat("sum(f(x)) =", sum(fx),"\n")
+     # 확률변수 X 평균, 분산
+	X.val <- 0:nsamp
+	EX <- sum(X.val * fx)
+	EX2 <- sum(X.val^2 * fx)
+	VX <- EX2 - EX^2
+	DX <- sqrt(VX)
+	Xmin <- min(X.val)-1
+	Xmax <- max(X.val)+1
+	
+     # 확률변수 X의 분포 그래프
+	win.graph(7, 5)
+	plot(X.val, fx, type="h", col="red", lwd=4, xlim=c(Xmin, Xmax), ylim=c(0, max(fx)+0.05), 
+		main=paste0("(", npop,"개 중 ",ndef,"개 불량)에서 ",nsamp,"개 추출 확률분포"),
+		xlab="불량개수", ylab="f(x)")
+     # 확률(빈도) 표시
+	text(X.val, fx, labels=round(fx, 4), pos=3, cex=0.8, col=4)
+	legend("topright", c(paste("E(X) =",EX), 
+		paste("D(X) =", round(DX,4))), bg="white")
+}

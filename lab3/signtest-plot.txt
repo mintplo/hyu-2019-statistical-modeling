@@ -1,0 +1,67 @@
+signtest.plot <- function(x, mu0=0, sided="two", xlab="부호검정 통계량") {
+	d <- x-mu0
+	# mu0보다 큰 데이터의 개수
+	np <- sum(d > 0)
+	n <- sum(d != 0)
+	pv1 <- 1-pbinom(np-1, n, 0.5)
+	pv2 <- pbinom(np, n, 0.5)
+
+	# 정규근사 방법 (연속성 보정)
+	mu <- n/2
+	sigsq <- n/4
+	sig <- sqrt(sigsq)
+	apv1 <- pnorm(np-0.5, mu, sig,lower.tail=F)
+	apv2 <- pnorm(np+0.5, mu, sig,lower.tail=T)
+
+	# p-값 계산 및 출력
+	if (sided=="up") {
+		pv <- pv1
+		apv <- apv1
+	} else if (sided=="low") {
+		pv <- pv2
+		apv <- apv2
+	} else {
+		pv <- 2*min(pv1, pv2)
+		apv <- 2*min(apv1, apv2)
+	}
+	cat("Exact P-value =", pv, "\n")
+	cat("Approximate P-value =", apv, "\n")
+
+	# 검정통계량의 확률분포함수와 p-값 표시
+	xa <- 0:n
+	xca <- (0:(10*n))/10
+	pdf <- dbinom(xa, n, 0.5)
+	ymax <- max(pdf)*1.05
+	ymin <- -0.1*max(pdf)
+	# 빈 그림
+	win.graph(7,5)
+	plot(xa, pdf, type="n", xlab="부호 통계량(양의 부호)", ylab="f(x)", ylim=c(ymin,ymax),
+		main=paste0("부호 통계량의 분포 (n=", n, ")"))
+	# 정규근사
+	lines(xca, dnorm(xca, mu, sig), col=4)
+	abline(h=0)
+
+	# 검정통계량의 확률분포함수
+	lines(xa, dbinom(xa, n, 0.5), type="h", lwd=7, col=grey(0.6))
+	# 중심위치 표시
+	segments(mu, 0, mu, dnorm(mu, mu, sig), lty=2, col=2)
+	text(mu, ymin/2, labels=mu, col=4)
+	# 기각치 표시
+	segments(np, 0, np, dbinom(np, n, 0.5), lwd=2, col=2)
+	text(np, dbinom(np, n, 0.5), labels=np, col=2, pos=3)
+
+	# p-값 표시
+	if (sided=="up") {
+		lines(np:n, dbinom(np:n, n, 0.5),  type="h", col=2, lwd=7)
+		text(n, ymin/2, labels=paste0("pv=", round(pv, 4)), col=4, pos=2)
+	} else if (sided=="low") {
+		lines(0:np, dbinom(0:np, n, 0.5),  type="h", col=2, lwd=7)
+		text(0, ymin/2, labels=paste0("pv=", round(pv, 4)), col=4, pos=4)
+	} else {
+		lines(np:n, dbinom(np:n, n, 0.5),  type="h", col=2, lwd=7)
+		lines(0:(n-np), dbinom(0:(n-np), n, 0.5),  type="h", col=2, lwd=7)
+		text(n, ymin/2, labels=paste0("pv1=", round(pv/2, 4)), col=4, pos=2)
+		text(0, ymin/2, labels=paste0("pv2=", round(pv/2, 4)), col=4, pos=4)
+	}
+
+}

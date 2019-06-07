@@ -1,0 +1,34 @@
+# ["runs-test.txt"]
+# 런 검정 (양측) 기각치를 구하는 함수 정의 ---------------------------------
+cvruns.exact <- function (alpha=0.05, n1, n2) {
+	nmin <- min(n1, n2)
+	nmax <- max(n1, n2)
+	rmax <- ifelse(n1 == n2, 2 * n1, 2 * min(n1, n2) + 1)
+	# 하한 기각치
+	pv1 <- pruns.exact(2, n1, n2)
+	if (pv1 > alpha) {
+		cr1 <- NA
+	} else {
+		for (r in 2:nmin) 	{	
+			cp <- pruns.exact(r, n1, n2)
+			if (cp <= alpha) cr1 <- r 	}
+	}
+	# 상한 기각치
+	pv2 <- pruns.exact(rmax, n1, n2)
+	if (pv2 > alpha) {
+		cr2 <- NA
+	} else {
+		for (r in rmax:nmax) 	{	
+			cp <- pruns.exact(r, n1, n2)
+			if (cp <= alpha) cr2 <- r 	}
+	}  
+	return(list(lcr=cr1, ucr=cr2))
+}
+# Probability Mass Function 정의 -------------------------------------
+druns.exact <- function (r, n1, n2)
+{	if (r <= 1) stop("Number of runs must be >1")
+	pv1 <- ifelse(r<=2, 0, pruns.exact(r-1, n1, n2, tail="lower"))
+	pruns.exact(r, n1, n2, tail="lower") - pv1
+}
+# 벡터 버전 함수 정의 --------------------------------------------------------
+Vdruns.exact <- Vectorize(druns.exact, "r")

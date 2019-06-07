@@ -1,0 +1,55 @@
+corr.plot <- function(X, Mt, item) {
+# 확률변수의 빈도
+Xf <- vector("list", 4)
+for (k in 1:4) {Xf[[k]] <- table(X[[k]])
+	print(Xf[[k]]) }
+# 확률변수
+Xv <- vector("list", 4)
+for (k in 1:4) Xv[[k]] <- as.numeric(names(Xf[[k]]))
+# 확률분포함수
+Xp <- vector("list", 4)
+for (k in 1:4) Xp[[k]] <- Xf[[k]] / N
+# 기대값 계산
+EX <- vector("list", 4)
+for (k in 1:4) EX[[k]] <- Xv[[k]] %*% Xp[[k]]
+cat("E(X1) =", EX[[1]], "E(X2) =", EX[[2]], "E(X3) =", EX[[3]], "E(X4) =", EX[[4]], "\n")
+
+# 분산 계산
+VX <- vector("list", 4)
+for (k in 1:4) VX[[k]] <- Xv[[k]]^2 %*% Xp[[k]] - EX[[k]]^2
+cat("Var(X1) =", VX[[1]], "Var(X2) =", VX[[2]], "Var(X3) =", VX[[3]], "Var(X4) =", VX[[4]], "\n")
+
+# 확률변수의 결합빈도 (1,2)=1, (1,3)=2, (1,4)=3, (2,3)=4, (2,4)=5, (3,4)=6
+XYf <- vector("list", 6)
+for (k in 1:3) for (m in (k+1):4) XYf[[k+m-1-(k==1)]] <- table(X[[k]], X[[m]])
+# 결합확률분포함수
+XYp <- vector("list", 6)
+for (k in 1:6) XYp[[k]] <- XYf[[k]] / N
+# 공분산 계산
+XYc <- vector("list", 6)
+for (k in 1:3) for (m in (k+1):4) {XYc[[k+m-1-(k==1)]] <- 
+	as.vector(Xv[[k]] %o% Xv[[m]]) %*% 
+	as.vector(XYp[[k+m-1-(k==1)]]) -EX[[k]] * EX[[m]] }
+cat("Cov(X1,X2) =", XYc[[1]], "Cov(X1,X3) =", XYc[[2]], "Cov(X1,X4) =", XYc[[3]], "\n")
+cat("Cov(X2,X3) =", XYc[[4]], "Cov(X2,X4) =", XYc[[5]], "Cov(X3,X4) =", XYc[[6]], "\n")
+# 상관계수 계산
+XYr <- vector("list", 6)
+for (k in 1:3) for (m in (k+1):4) {XYr[[k+m-1-(k==1)]] <- 
+	XYc[[k+m-1-(k==1)]] / (VX[[k]] * VX[[m]])^0.5}
+cat("Corr(X1,X2) =", XYr[[1]], "Corr(X1,X3) =", XYr[[2]], "Corr(X1,X4) =", XYr[[3]], "\n")
+cat("Corr(X2,X3) =", XYr[[4]], "Corr(X2,X4) =", XYr[[5]], "Corr(X3,X4) =", XYr[[6]], "\n")
+
+# 확률변수의 분포 그래프 -----------------------------------------
+win.graph(7,6); par(mfrow=c(2,2))
+for (k in 1:4) plot(Xp[[k]], type="h", col="red", main=Mt[k], lwd=3)
+
+# 확률변수 간의 산점도  -----------------------------------------
+St <- vector("character", 6)
+for (k in 1:3) for (m in (k+1):4) St[k+m-1-(k==1)] <- paste(item[m], ":", item[k])
+
+win.graph(7, 4.5); par(mfrow=c(2,3))
+for (k in 1:3) for (m in (k+1):4) {
+	plot(X[[m]], X[[k]], pch=19, col=4, main=St[k+m-1-(k==1)], 
+		xlab=item[m], ylab=item[k])
+	abline(lm(X[[k]]~X[[m]]), col=2)}
+}

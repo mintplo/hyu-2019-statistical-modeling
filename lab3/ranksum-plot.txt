@@ -1,0 +1,79 @@
+ranksum.plot <- function(x, y, sided="two", xlab="순위합 통계량") {
+	# 검정통계량 및 p-값 직접 계산
+	n1 <- length(x); n2 <- length(y)
+	U1 <- sum(rank(c(x,y))[1:n1]) - n1*(n1+1)/2
+	U2 <- sum(rank(c(x,y))[(n1+1):(n1+n2)]) -n2*(n2+1)/2
+	pv1 <- pwilcox(U2, n1, n2)
+	pv2 <- pwilcox(U1, n1, n2)
+	U <- min(U1, U2)
+	pv <- 2*pwilcox(U, n1, n2)
+  	cat("n1=",n1,"n2=",n2,"U1=",U1,"U2=",U2,"\n")
+
+	# 정규근사 방법 (연속성 보정 안함)
+	mu <- n1*n2/2
+	sigsq <- n1*n2*(n1+n2+1)/12
+	sig <- sqrt(sigsq)
+	apv1 <- pnorm(U2, mu, sig,lower.tail=T)
+	apv2 <- pnorm(U1, mu, sig,lower.tail=T)
+
+	# p-값 계산 및 출력
+	if (sided=="up") {
+		pv <- pv1
+		apv <- apv1
+		cat("U-stat=",U2,"\n")
+	} else if (sided=="low") {
+		pv <- pv2
+		apv <- apv2
+		cat("U-stat=",U1,"\n")
+	} else {
+		pv <- 2*min(pv1, pv2)
+		apv <- 2*min(apv1, apv2)
+		cat("U-stat=",U,"\n")
+	}
+	cat("Exact P-value =", pv, "\n")
+	cat("Approximate P-value =", apv, "\n")
+
+	# 검정통계량의 확률분포함수와 p-값 표시
+	xmax <- ((n1+n2)*(n1+n2+1)/2 - n1*(n1+1)/2)/2
+	xa <- 0:xmax
+	xca <- (0:(10*xmax))/10
+	pdf <- dwilcox(xa, n1, n2)
+	ymax <- max(pdf)*1.05
+	ymin <- -0.1*max(pdf)
+	# 빈 그림
+	win.graph(7,5)
+	plot(xa, pdf, type="n", xlab=xlab, ylab="f(u)", ylim=c(ymin, ymax),
+		main=paste0("Wilcoxon Rank Sum Distribution (n1=", n1, ", n2=", n2,")"))
+	# 정규근사
+	lines(xca, dnorm(xca, mu, sig), col=4)
+	abline(h=0)
+
+	# 검정통계량의 확률분포함수
+	lines(xa, dwilcox(xa, n1, n2), type="h", lwd=3, col=grey(0.6))
+	# 중심위치 표시
+	segments(mu, 0, mu, dnorm(mu, mu, sig), lty=2, col=2)
+	text(mu, ymin/2, labels=mu, col=4)
+
+	# 기각역과 p-값 표시
+	if (sided=="up") {
+		# 위쪽 기각역 표시
+		text(U2, dwilcox(U2, n1, n2), labels=U2, col=2, pos=3)
+		lines(0:U2, dwilcox(0:U2, n1, n2),  type="h", col=2, lwd=3)
+		text(0, ymin/2, labels=paste0("pv=", round(pv, 4)), col=4, pos=4)
+	} else if (sided=="low") {
+		# 아래쪽 기각역 표시
+		text(U1, dwilcox(U1, n1, n2), labels=U1, col=2, pos=3)
+		lines(0:U1, dwilcox(0:U1, n1, n2),  type="h", col=2, lwd=3)
+		text(0, ymin/2, labels=paste0("pv=", round(pv, 4)), col=4, pos=4)
+	} else {
+		# 아래쪽 기각역 표시
+		text(U1, dwilcox(U1, n1, n2), labels=U1, col=2, pos=3)
+		lines(0:U1, dwilcox(0:U1, n1, n2),  type="h", col=2, lwd=3)
+		text(0, ymin/2, labels=paste0("pv2=", round(pv/2, 4)), col=4, pos=4)
+		# 위쪽 기각역 표시
+		text(U2, dwilcox(U2, n1, n2), labels=U2, col=2, pos=3)
+		lines(U2:xmax, dwilcox(U2:xmax, n1, n2),  type="h", col=2, lwd=3)
+		text(xmax, ymin/2, labels=paste0("pv1=", round(pv/2, 4)), col=4, pos=2)
+	}
+
+}

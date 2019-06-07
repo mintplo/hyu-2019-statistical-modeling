@@ -1,0 +1,80 @@
+signranksum.plot <- function(x, y, mu0=0, sided="two", xlab="부호순위합 통계량") {
+	# 검정통계량 및 p-값 직접 계산
+	d <- x-y-mu0
+	d <- d[d !=0]
+	n <- length(d)
+	rv <- rank(abs(d))
+	w1 <- sum(rv[d>0])
+	w2 <- sum(rv[d<0])
+	pv1 <- psignrank(w2, n)
+	pv2 <- psignrank(w1, n)
+  	cat("n=",n, "W1=",w1,"W2=",w2,"\n")
+
+	# 정규근사 방법 (연속성 보정)
+	mu <- n*(n+1)/4
+	sigsq <- n*(n+1)*(2*n+1)/24
+	sig <- sqrt(sigsq)
+	apv1 <- pnorm(w2+0.5, mu, sig)
+	apv2 <- pnorm(w1+0.5, mu, sig)
+
+	# p-값 계산 및 출력
+	if (sided=="up") {
+		pv <- pv1
+		apv <- apv1
+		cat("W-stat=",w2,"\n")
+	} else if (sided=="low") {
+		pv <- pv2
+		apv <- apv2
+		cat("W-stat=",w1,"\n")
+	} else {
+		pv <- 2*min(pv1, pv2)
+		apv <- 2*min(apv1, apv2)
+		cat("W-stat=",min(w1, w2), "\n")
+	}
+	cat("Exact P-value =", pv, "\n")
+	cat("Approximate P-value =", apv, "\n")
+
+	# 검정통계량의 확률분포함수와 p-값 표시
+	xmax <- n*(n+1)/2
+	xa <- 0:xmax
+	xca <- (0:(10*xmax))/10
+	pdf <- dsignrank(xa, n)
+	ymax <- max(pdf)*1.05
+	ymin <- -0.1*max(pdf)
+	# 빈 그림
+	win.graph(7,5)
+	plot(xa, pdf, type="n", xlab=xlab, ylab="f(u)", ylim=c(ymin, ymax),
+		main=paste0("Wilcoxon Sgned Rank Sum Test (n=", n, ")"))
+	# 정규근사
+	lines(xca, dnorm(xca, mu, sig), col=4)
+	abline(h=0)
+
+	# 검정통계량의 확률분포함수
+	lines(xa, pdf, type="h", lwd=3, col=grey(0.6))
+	# 중심위치 표시
+	segments(mu, 0, mu, dnorm(mu, mu, sig), lty=2, col=2)
+	text(mu, ymin/2, labels=mu, col=4)
+
+	# 기각역과 p-값 표시
+	if (sided=="up") {
+		# 위쪽 기각역 표시
+		text(w1, dsignrank(w1, n), labels=w1, col=2, pos=3)
+		lines(w1:xmax, dsignrank(w1:xmax, n),  type="h", col=2, lwd=3)
+		text(xmax, ymin/2, labels=paste0("pv=", round(pv, 4)), col=4, pos=2)
+	} else if (sided=="low") {
+		# 아래쪽 기각역 표시
+		text(w1, dsignrank(w1, n), labels=w1, col=2, pos=3)
+		lines(0:w1, dsignrank(0:w1, n),  type="h", col=2, lwd=3)
+		text(0, ymin/2, labels=paste0("pv=", round(pv, 4)), col=4, pos=4)
+	} else {
+		# 아래쪽 기각역 표시
+		text(w2, dsignrank(w2, n), labels=w2, col=2, pos=3)
+		lines(0:w2, dsignrank(0:w2, n),  type="h", col=2, lwd=3)
+		text(0, ymin/2, labels=paste0("pv2=", round(pv/2, 4)), col=4, pos=4)
+		# 위쪽 기각역 표시
+		text(w1, dsignrank(w1, n), labels=w1, col=2, pos=3)
+		lines(w1:xmax, dsignrank(w1:xmax, n),  type="h", col=2, lwd=3)
+		text(xmax, ymin/2, labels=paste0("pv1=", round(pv/2, 4)), col=4, pos=2)
+	}
+
+}

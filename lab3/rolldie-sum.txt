@@ -1,0 +1,31 @@
+rolldie.sum <- function(n) {
+     # 표본공간 생성
+	S <- rolldie(n)
+	N <- nrow(S)
+     # 확률변수 X 생성
+	X <- apply(S, 1, sum)
+	X.freq <- table(X)
+	print(addmargins(X.freq))
+	X.prob <- X.freq / length(X)
+	print(round(addmargins(X.prob), 4))
+     # 확률변수 X 평균, 분산
+	X.val <- as.numeric(names(X.freq))
+	EX <- sum(X.val * X.prob)
+	EX2 <- sum(X.val^2 * X.prob)
+	VX <- EX2 - EX^2
+	DX <- sqrt(VX)
+	Xmin <- min(X.val)
+	Xmax <- max(X.val)
+	
+     # 확률변수 X의 분포 그래프
+	win.graph(7, 5)
+	plot(X.prob, type="h", col="red", 
+		main=paste0("주사위 ", n, "개 눈의 합 확률분포"),
+		lwd=4, ylim=c(0, max(X.prob)+0.01))
+	fitnorm <- function(x) dnorm(x, EX, DX)
+	curve(fitnorm, Xmin, Xmax, add=T, col=4)
+     # 확률(빈도) 표시
+	text(Xmin:Xmax, X.prob, labels=X.freq, pos=3, col=4, cex=ifelse(n>4, 0.8, 1))
+	legend("topright", c(paste("denom =",N), paste("E(X) =",EX), 
+		paste("D(X) =", round(DX,4))), bg="white")
+}

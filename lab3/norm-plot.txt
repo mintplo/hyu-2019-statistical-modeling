@@ -1,0 +1,16 @@
+# 그래프 작성
+testplot <- function(z, d=rep(0.5, 3), m=3, dn="히스토그램", n=c(10,30,50)) {
+  win.graph(3*m, 6)
+  par(mfrow=c(2,m))
+  for (j in 1:m) { 
+    # 구간 설정 : 0을 중심으로 폭은 d[j]로 하여 모든 데이터가 포함되도록
+    br <- c(rev(seq(-d[j]/2, min(z[[j]])-d[j], by=-d[j])), seq(d[j]/2, max(z[[j]])+d[j], by=d[j]))
+    hist(z[[j]], breaks=br, prob=T, xlim=c(-4,4), col=7, ylab="f(x)",
+	main=paste0(dn, "  n=", n[[j]]), xlab=NULL)
+    curve(dnorm, -4, 4, lwd=2, col=2, add=T) }
+  # 정규확률도 (점이 너무 많아서 100개만 선택해서 그림) qqnorm( ) 함수 사용
+  set.seed(47)
+  for (j in 1:3) { zss <- sort(z[[j]])[(0:99)*100+50]
+	temp <- qqnorm(zss, pch=19, cex=0.8)
+	abline(lm(temp$y ~ temp$x), lwd=2, col=2) }
+}

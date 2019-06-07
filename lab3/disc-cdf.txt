@@ -1,0 +1,25 @@
+disc.cdf <- function(xv, xp,mt, cpt=1.2, cch=1, dch=3) {
+    # 누적분포함수 F(x) 정의
+	xcdf <- c(0, cumsum(xp))
+	sf <- stepfun(xv, xcdf)
+     # 누적분포함수 F(x) 플롯
+	if (missing(mt)) mt <- "X의 누적분포함수(CDF)"
+	win.graph(7, 5)
+	plot(sf, main=mt, verticals=F, pch=19, lwd=2, cex=1.2,
+		col=2, xlab="x", ylab="F(x)")
+	grid(col=3)
+     # 경계 점 강조
+	# points(xv, xcdf[-1], pch=19, col=2, cex=cpt)
+	points(xv, xcdf[-length(xcdf)], col=2, cex=cpt)
+     # 확률 표시
+	text(xv, xcdf[-1], labels=round(xcdf[-1], dch), cex=cch, col=4, pos=2)
+     # 확률변수 X 평균, 분산
+	EX <- sum(xv * xp)
+	EX2 <- sum(xv^2 * xp)
+	VX <- EX2 - EX^2
+	DX <- sqrt(VX)
+
+     # 범례 표시
+	legend("bottomright", c(paste("E(X) =",round(EX,4)), 
+		paste("D(X) =", round(DX,4))), bg="white")
+}

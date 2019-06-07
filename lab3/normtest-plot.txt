@@ -1,0 +1,43 @@
+normtest.plot <- function(md, mu0=0, se=1, prng=c(-3,3), sided="two", xlab="표본평균") {
+	xa <- seq(prng[1], prng[2], length.out=101)
+	plot(xa, dnorm(xa, mu0, se), type="n", xlab=xlab, ylab="pdf", 
+		ylim=c(-0.1, 1)*max(dnorm(xa, mu0, se)),
+		main=paste0("귀무가설 하에서 ", xlab, "의 분포: N(", mu0,", ",round(se,3), "^2)"))
+	# p-값 및 분포
+	if (sided=="up") {
+		pv <- pnorm(md, mu0, se, lower.tail=FALSE)
+		cat("P-v =", pv, "\n")
+		cord.x <- c(md, seq(md, prng[2], length.out=20), prng[2]) 
+		cord.y <- c(0, dnorm(seq(md, prng[2], length.out=20), mu0, se), 0) 
+		polygon(cord.x, cord.y, col='lightcyan')
+		segments(md, 0, md, dnorm(md, mu0, se), lwd=2, col=2)
+		text(md, dnorm(md, mu0, se)*0.9, round(pv, 4), pos=4, col=2)
+		text(md, 0, round(md, 4), pos=1, col=4)
+	} else if (sided=="low") {
+		pv <- pnorm(md, mu0, se)
+		cat("P-v =", pv, "\n")
+		cord.x <- c(prng[1], seq(prng[1], md, length.out=20), md) 
+		cord.y <- c(0, dnorm(seq(prng[1], md, length.out=20), mu0, se), 0) 
+		polygon(cord.x, cord.y, col='lightcyan')
+		segments(md, 0, md, dnorm(md, mu0, se), lwd=2, col=2)
+		text(md, dnorm(md, mu0, se)*0.9, round(pv, 4), pos=2, col=2)
+		text(md, 0, round(md, 4), pos=1, col=4)
+	} else {
+		mlow <- ifelse(md>mu0, 2*mu0-md, md)
+		mup <- ifelse(md>mu0, md, 2*mu0-md)
+		pv <- 2*pnorm(mlow, mu0, se)
+		cat("P-v =", pv, "\n")
+		cord.x <- c(mup, seq(mup, prng[2], length.out=20), prng[2]) 
+		cord.y <- c(0, dnorm(seq(mup, prng[2], length.out=20), mu0, se), 0) 
+		polygon(cord.x, cord.y, col='lightcyan')
+		cord.x <- c(prng[1], seq(prng[1], mlow, length.out=20), mlow) 
+		cord.y <- c(0, dnorm(seq(prng[1], mlow, length.out=20), mu0, se), 0) 
+		polygon(cord.x, cord.y, col='lightcyan')
+		segments(c(mlow, mup), 0, c(mlow, mup), dnorm(md, mu0, se), lwd=2, col=2)
+		text(c(mlow, mup), dnorm(md, mu0, se)*0.9, round(pv/2, 4), pos=c(2,4), col=2)
+		text(c(mlow, mup), 0, round(c(mlow, mup), 4), pos=1, col=4)
+	}
+	abline(h=0); abline(v=mu0, lty=2, lwd=2, col="green3")
+	lines(xa, dnorm(xa, mu0, se), type="l", lwd=2, col=4)
+}
+	

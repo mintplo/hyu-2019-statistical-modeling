@@ -1,0 +1,44 @@
+ftest.plot <- function(fstat, deg, prng=c(0,qf(0.9999, deg[1], deg[2])), sided="two") {
+	xa <- seq(prng[1], prng[2], length.out=101)
+	plot(xa, df(xa, deg[1], deg[2]), type="n", xlab="F-통계량", ylab="pdf", 
+		ylim=c(-0.1, 1)*max(df(xa, deg[1], deg[2])),
+		main=paste0("귀무가설 하에서 F-통계량의 분포: F(", deg[1],", ", deg[2], ")"))
+	# p-값 및 분포
+	plow <- pf(fstat, deg[1], deg[2])
+	if (sided=="up") {
+		pv <- 1-plow
+		cat("P-v =", pv, "\n")
+		cord.x <- c(fstat, seq(fstat, prng[2], length.out=20), prng[2]) 
+		cord.y <- c(0, df(seq(fstat, prng[2], length.out=20), deg[1], deg[2]), 0) 
+		polygon(cord.x, cord.y, col='lightcyan')
+		segments(fstat, 0, fstat, df(fstat, deg[1], deg[2]), lwd=2, col=2)
+		text(fstat, df(fstat, deg[1], deg[2])*0.9, round(pv, 4), pos=4, col=2)
+		text(fstat, 0, round(fstat, 4), pos=1, col=4)
+	} else if (sided=="low") {
+		pv <- plow
+		cat("P-v =", pv, "\n")
+		cord.x <- c(prng[1], seq(prng[1], fstat, length.out=20), fstat) 
+		cord.y <- c(0, df(seq(prng[1], fstat, length.out=20), deg[1], deg[2]), 0) 
+		polygon(cord.x, cord.y, col='lightcyan')
+		segments(fstat, 0, fstat, df(fstat, deg[1], deg[2]), lwd=2, col=2)
+		text(fstat, df(fstat, deg[1], deg[2])*0.9, round(pv, 4), pos=2, col=2)
+		text(fstat, 0, round(fstat, 4), pos=1, col=4)
+	} else {
+		pv <- 2*min(plow, 1-plow)
+		cat("P-v =", pv, "\n")
+		mlow <-qf(pv/2, deg[1], deg[2])
+		mup <-qf(1-pv/2, deg[1], deg[2])
+		cord.x <- c(mup, seq(mup, prng[2], length.out=20), prng[2]) 
+		cord.y <- c(0, df(seq(mup, prng[2], length.out=20), deg[1], deg[2]), 0) 
+		polygon(cord.x, cord.y, col='lightcyan')
+		cord.x <- c(prng[1], seq(prng[1], mlow, length.out=20), mlow) 
+		cord.y <- c(0, df(seq(prng[1], mlow, length.out=20), deg[1], deg[2]), 0) 
+		polygon(cord.x, cord.y, col='lightcyan')
+		segments(c(mlow, mup), 0, c(mlow, mup), df(c(mlow), deg[1], deg[2]), lwd=2, col=2)
+		text(c(mlow, mup), df(c(mlow), deg[1], deg[2]), round(pv/2, 4), pos=c(2,4), col=2)
+		text(c(mlow, mup), 0, round(c(mlow, mup), 4), pos=1, col=4)
+	}
+	abline(h=0); abline(v=qf(0.5, deg[1], deg[2]), lty=2, lwd=2, col="green3")
+	lines(xa, df(xa, deg[1], deg[2]), type="l", lwd=2, col=4)
+}
+	
